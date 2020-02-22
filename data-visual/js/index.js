@@ -387,7 +387,8 @@
         // ----------------------设置 dom上的操作
         myChart.setOption(option);
         // console.log(key);
-
+        console.log($(this).data('index'));
+        index = $(this).data('index') //获取预先设置好与索引对应的自定义属性赋值给index
     });
 
     // 为了获取定时器变量名应设置在封装函数的外边
@@ -396,9 +397,8 @@
     // 移出事件同样执行下边的函数 重复 需封装函数
     function dsq() {
         dsq_1 = setInterval(function () {
-            if (index < 4) {
-                index++
-            } else {
+            index++
+            if (index > 3) {
                 index = 0
             }
             $('.sales .caption a').eq(index).click();
