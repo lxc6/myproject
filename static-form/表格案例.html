@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>老高的表格案例</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
+
+  <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+</head>
+
+<body>
+  <div v-cloak class="container-fluid">
+    <div class="row">
+      <div class="col-md-3"></div>
+      <div class="col-md-8">
+        <div class="page-header">
+          <h1>表格案例 <small>Follow me!!!</small></h1>
+        </div>
+        <!-- 添加框 -->
+        <div class="form-inline">
+          <div class="form-group">
+            <input v-focus v-model.trim="addMsg" type="text" class="form-control" placeholder="请输入你理想的公司" />
+          </div>
+          <!-- disabled=true时禁选，反之可选  -->
+          <button :disabled="!addMsg" @click="add" class="btn btn-success" type="submit">添加</button>
+        </div>
+        <!-- 搜索框 -->
+        <div class="form-inline" style="margin: 20px 0">
+          <div class="form-group">
+            <input v-model="searchVal" type="text" class="form-control" placeholder="搜索关键字" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3"></div>
+      <div class="col-md-6">
+        <table class="table table-hover">
+          <thead>
+            <th>#</th>
+            <th>公司名称</th>
+            <th>事件</th>
+            <th>操作</th>
+          </thead>
+          <tbody>
+            <tr v-for="(item,index) in search">
+              <td>{{index+1}}</td>
+              <td>{{item.name}}</td>
+              <td>{{item.date|time}}</td>
+              <td>
+                <!-- 添加事件修饰符prevent  阻止默认跳转 a标签点击出现 # -->
+                <a @click.prevent="del(index)" href="#">删除</a>
+              </td>
+            </tr>
+            <tr v-if="!list.length">
+              <td colspan="4" style="color:#999">没有任何数据</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- 引入vue -->
+  <script src="./vue.js"></script>
+  <script src="./moment.min.js"></script>
+  <script>
+    let vm = new Vue({
+      el: '.container-fluid',
+      data: {
+        addMsg: '',
+        searchVal: '',
+        list: [{
+            name: '阿里巴巴',
+            date: new Date()
+          },
+          {
+            name: '字节跳动',
+            date: new Date()
+          },
+          {
+            name: '腾讯',
+            date: new Date()
+          },
+          {
+            name: '百度',
+            date: new Date()
+          },
+          {
+            name: '新浪',
+            date: new Date()
+          }
+        ]
+      },
+      methods: {
+        add() {
+          let obj = {
+            name: this.addMsg,
+            date: new Date()
+          }
+          this.list.unshift(obj)
+          // this.list.push(obj)
+          this.addMsg = ''
+        },
+        del(i) {
+          this.list.splice(i, 1)
+          // 过滤器必须有返回值
+          // this.list = this.list.filter(function(item,index){if(true){return index!==i}})
+          // this.list = this.list.filter((item, index) => index !== i)
+        }
+      },
+      filters: {
+        time(value) {
+          return moment(value).format("YYYY-MM-DD HH:mm:ss")
+        }
+      },
+      directives: {
+        focus: {
+          inserted(dom) {
+            dom.focus()
+          }
+        }
+      },
+      computed: {
+        search() {
+          return this.list.filter((item) => item.name.includes(this.searchVal))
+        }
+      }
+    });
+  </script>
+
+
+
+</body>
+
+</html>
