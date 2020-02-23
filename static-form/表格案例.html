@@ -46,13 +46,14 @@
             <th>操作</th>
           </thead>
           <tbody>
-            <tr v-for="(item,index) in search">
+            <!-- 取消计算属性 循环数据换成list -->
+            <tr v-for="(item,index) in list">
               <td>{{index+1}}</td>
               <td>{{item.name}}</td>
               <td>{{item.date|time}}</td>
               <td>
                 <!-- 添加事件修饰符prevent  阻止默认跳转 a标签点击出现 # -->
-                <a @click.prevent="del(index)" href="#">删除</a>
+                <a @click.prevent="del(item.id)" href="#">删除</a>
               </td>
             </tr>
             <tr v-if="!list.length">
@@ -65,6 +66,7 @@
   </div>
   <!-- 引入vue -->
   <script src="./vue.js"></script>
+  <script src="./axios.min.js"></script>
   <script src="./moment.min.js"></script>
   <script>
     let vm = new Vue({
@@ -72,43 +74,41 @@
       data: {
         addMsg: '',
         searchVal: '',
-        list: [{
-            name: '阿里巴巴',
-            date: new Date()
-          },
-          {
-            name: '字节跳动',
-            date: new Date()
-          },
-          {
-            name: '腾讯',
-            date: new Date()
-          },
-          {
-            name: '百度',
-            date: new Date()
-          },
-          {
-            name: '新浪',
-            date: new Date()
-          }
-        ]
+        list: [],
+        PATH: 'http://localhost:8080/company'
+      },
+      // watch监听实现 实时发出请求
+      watch: {
+        searchVal: function (newValue) {
+          axios.get(`${this.PATH}/?name_like=${newValue}`).then(res => {
+            this.list = res.data
+          })
+        }
       },
       methods: {
-        add() {
-          let obj = {
-            name: this.addMsg,
-            date: new Date()
-          }
-          this.list.unshift(obj)
-          // this.list.push(obj)
-          this.addMsg = ''
+        // 获取
+        getList() {
+          axios.get(this.PATH).then(res => {
+            this.list = res.data
+          })
         },
-        del(i) {
-          this.list.splice(i, 1)
-          // 过滤器必须有返回值
-          // this.list = this.list.filter(function(item,index){if(true){return index!==i}})
-          // this.list = this.list.filter((item, index) => index !== i)
+        add() {
+          let name = this.addMsg
+          let date = new Date()
+          axios.post(this.PATH, {
+            name,
+            date
+          }).then((res) => {
+            this.getList()
+            this.addMsg = ''
+          })
+        },
+        del(id) {
+          if (confirm('你确定要删除吗')) {
+            axios.delete(`${this.PATH}/${id}`).then(res => {
+              this.getList()
+            })
+          }
         }
       },
       filters: {
@@ -124,9 +124,13 @@
         }
       },
       computed: {
-        search() {
-          return this.list.filter((item) => item.name.includes(this.searchVal))
-        }
+        // search() {
+        //   return this.list.filter((item) => item.name.includes(this.searchVal))
+        // }
+      },
+      // 生命周期函数获取数据
+      created() {
+        this.getList()
       }
     });
   </script>
